@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
-define('ECOMMERCE_THEME_VERSION', '1.0.1');
+define('ECOMMERCE_THEME_VERSION', '1.0.2');
 define('ECOMMERCE_THEME_DIR', get_template_directory());
 define('ECOMMERCE_THEME_URI', get_template_directory_uri());
 
@@ -105,6 +105,15 @@ function ecommerce_theme_scripts() {
         'discountCode'          => 'LUXE50',
         'discountRate'          => 0.15, // 15% discount
         'themeUri'              => ECOMMERCE_THEME_URI,
+        'homeUrl'               => home_url('/'),
+        'shopUrl'               => home_url('/shop/'),
+        'categoriesUrl'         => home_url('/categories/'),
+        'dealsUrl'              => home_url('/deals/'),
+        'aboutUrl'              => home_url('/about/'),
+        'reviewsUrl'            => home_url('/reviews/'),
+        'contactUrl'            => home_url('/contact/'),
+        'cartUrl'               => home_url('/cart/'),
+        'checkoutUrl'           => home_url('/checkout/'),
     ]);
 }
 add_action('wp_enqueue_scripts', 'ecommerce_theme_scripts');
@@ -330,3 +339,116 @@ function ecommerce_filter_products($tab = 'all') {
     if ($tab === 'new') return array_filter($all, fn($p) => !empty($p['is_new']));
     return array_filter($all, fn($p) => $p['category'] === $tab);
 }
+
+/**
+ * Retrieve a product by ID or slug
+ */
+function ecommerce_get_product_by_id($id) {
+    $products = ecommerce_get_catalog_products();
+    foreach ($products as $p) {
+        if ($p['id'] === $id || sanitize_title($p['title']) === $id) {
+            return $p;
+        }
+    }
+    // Return first product as fallback if not found
+    return $products[0] ?? null;
+}
+
+/**
+ * Generate product permalink
+ */
+function ecommerce_get_product_url($product) {
+    $id = is_array($product) ? ($product['id'] ?? '') : $product;
+    return home_url('/product/' . $id . '/');
+}
+
+/**
+ * Generate route permalink
+ */
+function ecommerce_get_page_url($slug) {
+    return home_url('/' . trim($slug, '/') . '/');
+}
+
+/**
+ * Custom Route Rewrite Rules
+ */
+function ecommerce_custom_rewrite_rules() {
+    add_rewrite_rule('^shop/?$', 'index.php?ecommerce_route=shop', 'top');
+    add_rewrite_rule('^categories/?$', 'index.php?ecommerce_route=categories', 'top');
+    add_rewrite_rule('^deals/?$', 'index.php?ecommerce_route=deals', 'top');
+    add_rewrite_rule('^about/?$', 'index.php?ecommerce_route=about', 'top');
+    add_rewrite_rule('^reviews/?$', 'index.php?ecommerce_route=reviews', 'top');
+    add_rewrite_rule('^contact/?$', 'index.php?ecommerce_route=contact', 'top');
+    add_rewrite_rule('^cart/?$', 'index.php?ecommerce_route=cart', 'top');
+    add_rewrite_rule('^checkout/?$', 'index.php?ecommerce_route=checkout', 'top');
+    add_rewrite_rule('^product/([^/]+)/?$', 'index.php?ecommerce_product=$matches[1]', 'top');
+}
+add_action('init', 'ecommerce_custom_rewrite_rules');
+
+/**
+ * Register Custom Query Vars
+ */
+function ecommerce_custom_query_vars($vars) {
+    $vars[] = 'ecommerce_route';
+    $vars[] = 'ecommerce_product';
+    return $vars;
+}
+add_filter('query_vars', 'ecommerce_custom_query_vars');
+
+/**
+ * Template Router for Custom Routes
+ */
+function ecommerce_template_include($template) {
+    $route = get_query_var('ecommerce_route');
+    $product_id = get_query_var('ecommerce_product');
+
+    // Also support GET query parameters as fallback (?route=shop or ?product=prod-1)
+    if (empty($route) && isset($_GET['route'])) {
+        $route = sanitize_key($_GET['route']);
+    }
+    if (empty($product_id) && isset($_GET['product'])) {
+        $product_id = sanitize_text_field($_GET['product']);
+    }
+
+    if (!empty($product_id)) {
+        $single_template = locate_template(['single-product.php']);
+        if ($single_template) {
+            return $single_template;
+        }
+    }
+
+    if (!empty($route)) {
+        $templates_map = [
+            'shop'       => 'page-shop.php',
+            'categories' => 'page-categories.php',
+            'deals'      => 'page-deals.php',
+            'about'      => 'page-about.php',
+            'reviews'    => 'page-reviews.php',
+            'contact'    => 'page-contact.php',
+            'cart'       => 'page-cart.php',
+            'checkout'   => 'page-checkout.php',
+        ];
+        if (isset($templates_map[$route])) {
+            $custom_template = locate_template([$templates_map[$route]]);
+            if ($custom_template) {
+                return $custom_template;
+            }
+        }
+    }
+
+    return $template;
+}
+add_filter('template_include', 'ecommerce_template_include');
+
+/**
+ * Ensure Rewrite Rules are Flushed Once
+ */
+function ecommerce_check_flush_rewrite_rules() {
+    if (!get_option('ecommerce_rewrite_rules_flushed_v3')) {
+        ecommerce_custom_rewrite_rules();
+        flush_rewrite_rules();
+        update_option('ecommerce_rewrite_rules_flushed_v3', 1);
+    }
+}
+add_action('init', 'ecommerce_check_flush_rewrite_rules', 20);
+
