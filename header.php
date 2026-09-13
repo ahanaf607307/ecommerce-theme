@@ -62,14 +62,22 @@ if (!defined('ABSPATH')) {
         </div>
 
         <!-- Desktop Navigation -->
+        <?php
+        $current_route = get_query_var('ecommerce_route');
+        if (empty($current_route) && isset($_GET['route'])) {
+            $current_route = sanitize_key($_GET['route']);
+        }
+        $is_home = is_front_page() && empty($current_route) && empty(get_query_var('ecommerce_product')) && !isset($_GET['product']);
+        ?>
         <nav class="desktop-navigation" aria-label="<?php esc_attr_e('Primary Navigation', 'ecommerce'); ?>">
             <ul class="nav-menu">
-                <li class="nav-item"><a href="#hero" class="nav-link active">Home</a></li>
-                <li class="nav-item"><a href="#categories" class="nav-link">Categories</a></li>
-                <li class="nav-item"><a href="#products" class="nav-link">Featured Gear</a></li>
-                <li class="nav-item"><a href="#spotlight" class="nav-link">Spotlight</a></li>
-                <li class="nav-item"><a href="#deals" class="nav-link">Bundle Deals <span class="nav-pill">HOT</span></a></li>
-                <li class="nav-item"><a href="#reviews" class="nav-link">Reviews</a></li>
+                <li class="nav-item"><a href="<?php echo esc_url(home_url('/')); ?>" class="nav-link <?php echo $is_home ? 'active' : ''; ?>">Home</a></li>
+                <li class="nav-item"><a href="<?php echo esc_url(ecommerce_get_page_url('shop')); ?>" class="nav-link <?php echo $current_route === 'shop' ? 'active' : ''; ?>">Shop Gear</a></li>
+                <li class="nav-item"><a href="<?php echo esc_url(ecommerce_get_page_url('categories')); ?>" class="nav-link <?php echo $current_route === 'categories' ? 'active' : ''; ?>">Categories</a></li>
+                <li class="nav-item"><a href="<?php echo esc_url(ecommerce_get_page_url('deals')); ?>" class="nav-link <?php echo $current_route === 'deals' ? 'active' : ''; ?>">Deals <span class="nav-pill">HOT</span></a></li>
+                <li class="nav-item"><a href="<?php echo esc_url(ecommerce_get_page_url('reviews')); ?>" class="nav-link <?php echo $current_route === 'reviews' ? 'active' : ''; ?>">Reviews</a></li>
+                <li class="nav-item"><a href="<?php echo esc_url(ecommerce_get_page_url('about')); ?>" class="nav-link <?php echo $current_route === 'about' ? 'active' : ''; ?>">Our Story</a></li>
+                <li class="nav-item"><a href="<?php echo esc_url(ecommerce_get_page_url('contact')); ?>" class="nav-link <?php echo $current_route === 'contact' ? 'active' : ''; ?>">Contact</a></li>
             </ul>
         </nav>
 
@@ -118,12 +126,14 @@ if (!defined('ABSPATH')) {
         </div>
         <nav class="mobile-nav">
             <ul>
-                <li><a href="#hero" class="mobile-nav-link">Home</a></li>
-                <li><a href="#categories" class="mobile-nav-link">Categories</a></li>
-                <li><a href="#products" class="mobile-nav-link">Featured Gear</a></li>
-                <li><a href="#spotlight" class="mobile-nav-link">Flagship Spotlight</a></li>
-                <li><a href="#deals" class="mobile-nav-link">Limited Deals</a></li>
-                <li><a href="#reviews" class="mobile-nav-link">Customer Reviews</a></li>
+                <li><a href="<?php echo esc_url(home_url('/')); ?>" class="mobile-nav-link <?php echo $is_home ? 'active' : ''; ?>">Home</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('shop')); ?>" class="mobile-nav-link <?php echo $current_route === 'shop' ? 'active' : ''; ?>">Shop Gear</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('categories')); ?>" class="mobile-nav-link <?php echo $current_route === 'categories' ? 'active' : ''; ?>">Categories</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('deals')); ?>" class="mobile-nav-link <?php echo $current_route === 'deals' ? 'active' : ''; ?>">Limited Deals</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('reviews')); ?>" class="mobile-nav-link <?php echo $current_route === 'reviews' ? 'active' : ''; ?>">Customer Reviews</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('about')); ?>" class="mobile-nav-link <?php echo $current_route === 'about' ? 'active' : ''; ?>">Our Story</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('contact')); ?>" class="mobile-nav-link <?php echo $current_route === 'contact' ? 'active' : ''; ?>">Contact Concierge</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('cart')); ?>" class="mobile-nav-link <?php echo $current_route === 'cart' ? 'active' : ''; ?>"><i class="fa-solid fa-bag-shopping"></i> View Cart</a></li>
             </ul>
         </nav>
         <div class="mobile-drawer-footer">

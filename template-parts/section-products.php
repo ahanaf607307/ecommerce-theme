@@ -89,9 +89,9 @@ $products = ecommerce_get_catalog_products();
                         </button>
 
                         <!-- Product Thumbnail -->
-                        <div class="card-image-holder">
+                        <a href="<?php echo esc_url(ecommerce_get_product_url($product)); ?>" class="card-image-holder">
                             <img src="<?php echo esc_url($product['image']); ?>" alt="<?php echo esc_attr($product['title']); ?>" class="card-img" loading="lazy">
-                        </div>
+                        </a>
 
                         <!-- Hover Quick Action Overlay -->
                         <div class="card-hover-actions">
@@ -115,7 +115,7 @@ $products = ecommerce_get_catalog_products();
                         </div>
 
                         <h3 class="card-title">
-                            <a href="#product-<?php echo esc_attr($product['id']); ?>" class="quickview-link" data-id="<?php echo esc_attr($product['id']); ?>">
+                            <a href="<?php echo esc_url(ecommerce_get_product_url($product)); ?>">
                                 <?php echo esc_html($product['title']); ?>
                             </a>
                         </h3>

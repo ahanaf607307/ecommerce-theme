@@ -37,11 +37,11 @@ if (!defined('ABSPATH')) {
 
                 <!-- Dual Action Buttons -->
                 <div class="hero-actions">
-                    <a href="#products" class="btn btn-primary btn-glow btn-lg">
+                    <a href="<?php echo esc_url(ecommerce_get_page_url('shop')); ?>" class="btn btn-primary btn-glow btn-lg">
                         <i class="fa-solid fa-bag-shopping"></i>
                         <span>Explore Collection</span>
                     </a>
-                    <a href="#spotlight" class="btn btn-secondary btn-glass btn-lg">
+                    <a href="<?php echo esc_url(ecommerce_get_product_url('prod-1')); ?>" class="btn btn-secondary btn-glass btn-lg">
                         <i class="fa-solid fa-circle-play"></i>
                         <span>View Flagship Specs</span>
                     </a>

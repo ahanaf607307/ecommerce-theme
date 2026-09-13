@@ -108,31 +108,37 @@ if (!defined('ABSPATH')) {
         <div class="footer-nav-col">
             <h5 class="footer-col-title">Shop Gear</h5>
             <ul class="footer-links">
-                <li><a href="#products">Studio Headphones</a></li>
-                <li><a href="#products">True Wireless Earbuds</a></li>
-                <li><a href="#products">Smart Titanium Watches</a></li>
-                <li><a href="#products">MagSafe Fast Chargers</a></li>
-                <li><a href="#products">Desk Accessories & EDC</a></li>
-                <li><a href="#deals">Limited Flash Bundles</a></li>
+                <li><a href="<?php echo esc_url(add_query_arg('cat', 'audio', ecommerce_get_page_url('shop'))); ?>">Studio Headphones</a></li>
+                <li><a href="<?php echo esc_url(add_query_arg('cat', 'audio', ecommerce_get_page_url('shop'))); ?>">True Wireless Earbuds</a></li>
+                <li><a href="<?php echo esc_url(add_query_arg('cat', 'wearables', ecommerce_get_page_url('shop'))); ?>">Smart Titanium Watches</a></li>
+                <li><a href="<?php echo esc_url(add_query_arg('cat', 'edc', ecommerce_get_page_url('shop'))); ?>">MagSafe Fast Chargers</a></li>
+                <li><a href="<?php echo esc_url(add_query_arg('cat', 'edc', ecommerce_get_page_url('shop'))); ?>">Workspace &amp; Keyboards</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('deals')); ?>">Limited Flash Bundles</a></li>
             </ul>
         </div>
 
         <div class="footer-nav-col">
             <h5 class="footer-col-title">Customer Care</h5>
             <ul class="footer-links">
-                <li><a href="#">Track Your Order</a></li>
-                <li><a href="#">Shipping Rates & Policies</a></li>
-                <li><a href="#">Warranty & Claims</a></li>
-                <li><a href="#">Returns & Exchanges</a></li>
-                <li><a href="#">Product Care & Guides</a></li>
-                <li><a href="#">Contact Concierge</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('contact')); ?>">Track Your Order</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('reviews')); ?>">Verified Community Reviews</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('contact')); ?>">2-Year Warranty &amp; Claims</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('contact')); ?>">Returns &amp; Exchanges</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('cart')); ?>">Shopping Bag</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('contact')); ?>">Contact Concierge</a></li>
             </ul>
         </div>
 
         <div class="footer-nav-col">
-            <h5 class="footer-col-title">Company & Press</h5>
+            <h5 class="footer-col-title">Company &amp; Lab</h5>
             <ul class="footer-links">
-                <li><a href="#">Our Engineering Story</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('about')); ?>">Our Engineering Story</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('categories')); ?>">Hardware Disciplines</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('shop')); ?>">Browse Full Catalog</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('deals')); ?>">VIP Bundle Offers</a></li>
+                <li><a href="<?php echo esc_url(ecommerce_get_page_url('checkout')); ?>">Express Checkout</a></li>
+            </ul>
+        </div>
                 <li><a href="#">Sustainability & Materials</a></li>
                 <li><a href="#">Press Kit & Media</a></li>
                 <li><a href="#">Affiliate Program</a></li>

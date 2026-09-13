@@ -58,7 +58,7 @@ $categories = [
                 <h2 class="section-title">Explore By Category</h2>
                 <p class="section-subtitle">Crafted with precision engineering for peak creative focus and daily style.</p>
             </div>
-            <a href="#products" class="heading-link">
+            <a href="<?php echo esc_url(ecommerce_get_page_url('shop')); ?>" class="heading-link">
                 <span>View All Products</span>
                 <i class="fa-solid fa-arrow-right"></i>
             </a>
@@ -67,7 +67,7 @@ $categories = [
         <!-- Category Grid -->
         <div class="category-grid">
             <?php foreach ($categories as $cat) : ?>
-                <div class="category-card" data-category-filter="<?php echo esc_attr($cat['slug']); ?>">
+                <div class="category-card" onclick="window.location.href='<?php echo esc_url(add_query_arg('cat', $cat['slug'], ecommerce_get_page_url('shop'))); ?>'">
                     <div class="cat-image-wrapper">
                         <img src="<?php echo esc_url($cat['image']); ?>" alt="<?php echo esc_attr($cat['title']); ?>" class="cat-img" loading="lazy">
                         <div class="cat-overlay"></div>
@@ -79,10 +79,10 @@ $categories = [
                         </div>
                         <h3 class="cat-title"><?php echo esc_html($cat['title']); ?></h3>
                         <p class="cat-desc"><?php echo esc_html($cat['description']); ?></p>
-                        <button type="button" class="cat-action-btn" data-filter="<?php echo esc_attr($cat['slug']); ?>">
+                        <a href="<?php echo esc_url(add_query_arg('cat', $cat['slug'], ecommerce_get_page_url('shop'))); ?>" class="cat-action-btn">
                             <span>Shop <?php echo esc_html($cat['title']); ?></span>
                             <i class="fa-solid fa-arrow-right"></i>
-                        </button>
+                        </a>
                     </div>
                 </div>
             <?php endforeach; ?>

@@ -47,7 +47,7 @@ if (!defined('ABSPATH')) {
                 </div>
                 <h4>Your Bag Is Empty</h4>
                 <p>Explore our flagship headphones, smart wearables, and EDC gear to get started.</p>
-                <a href="#products" class="btn btn-primary btn-sm" id="cart-start-shopping">
+                <a href="<?php echo esc_url(ecommerce_get_page_url('shop')); ?>" class="btn btn-primary btn-sm" id="cart-start-shopping">
                     <span>Explore Products</span>
                     <i class="fa-solid fa-arrow-right"></i>
                 </a>
@@ -59,7 +59,7 @@ if (!defined('ABSPATH')) {
             <!-- Promo Code Accordion/Input -->
             <div class="cart-promo-section">
                 <form class="promo-form" id="cart-promo-form">
-                    <input type="text" id="cart-promo-input" placeholder="Promo code (try LUXE50)" uppercase>
+                    <input type="text" id="cart-promo-input" placeholder="Promo code (try LUXE50)">
                     <button type="submit" class="btn btn-secondary btn-sm" id="cart-promo-apply">Apply</button>
                 </form>
                 <div class="promo-feedback" id="cart-promo-feedback"></div>
@@ -86,11 +86,17 @@ if (!defined('ABSPATH')) {
                 </div>
             </div>
 
-            <!-- Checkout Button -->
-            <button type="button" class="btn btn-primary btn-lg btn-glow w-100" id="cart-checkout-btn">
-                <i class="fa-solid fa-lock"></i>
-                <span>Proceed to Checkout &bull; <span id="checkout-btn-amount">$0.00</span></span>
-            </button>
+            <!-- Navigation Buttons -->
+            <div class="drawer-action-btns">
+                <a href="<?php echo esc_url(ecommerce_get_page_url('cart')); ?>" class="btn btn-secondary w-100 mb-2">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                    <span>View Shopping Bag</span>
+                </a>
+                <a href="<?php echo esc_url(ecommerce_get_page_url('checkout')); ?>" class="btn btn-primary btn-lg btn-glow w-100" id="cart-checkout-btn">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Proceed to Checkout &bull; <span id="checkout-btn-amount">$0.00</span></span>
+                </a>
+            </div>
 
             <!-- Checkout Trust Micro-copy -->
             <div class="checkout-trust-badges">
