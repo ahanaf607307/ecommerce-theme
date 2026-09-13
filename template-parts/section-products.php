@@ -80,7 +80,12 @@ $products = ecommerce_get_catalog_products();
                                 </span>
                             <?php endif; ?>
                             <?php 
-                                $discount_pct = round((($product['regular_price'] - $product['price']) / $product['regular_price']) * 100);
+                                $reg_p = (float)($product['regular_price'] ?? 0);
+                                $cur_p = (float)($product['price'] ?? 0);
+                                $discount_pct = 0;
+                                if ($reg_p > 0 && $reg_p > $cur_p) {
+                                    $discount_pct = round((($reg_p - $cur_p) / $reg_p) * 100);
+                                }
                                 if ($discount_pct > 0) :
                             ?>
                                 <span class="badge badge-discount">-<?php echo esc_html($discount_pct); ?>%</span>

@@ -144,13 +144,33 @@ function ecommerce_format_wc_product($wc_prod) {
 
     // Categories
     $terms = wp_get_post_terms($id, 'product_cat');
-    $cat_slug = (!empty($terms) && !is_wp_error($terms)) ? $terms[0]->slug : 'general';
-    $cat_name = (!empty($terms) && !is_wp_error($terms)) ? $terms[0]->name : 'General';
+    $cat_slug = 'all';
+    $cat_name = 'General';
+    if (!empty($terms) && !is_wp_error($terms)) {
+        $chosen_term = $terms[0];
+        foreach ($terms as $t) {
+            if ($t->slug !== 'uncategorized') {
+                $chosen_term = $t;
+                break;
+            }
+        }
+        $cat_slug = $chosen_term->slug;
+        $cat_name = $chosen_term->name;
+    }
 
     // Pricing
-    $price = (float) $wc_prod->get_price();
     $regular_price = (float) $wc_prod->get_regular_price();
-    if (!$regular_price || $regular_price < $price) {
+    $sale_price = (float) $wc_prod->get_sale_price();
+    $price = (float) $wc_prod->get_price();
+
+    if ($price <= 0) {
+        if ($sale_price > 0) {
+            $price = $sale_price;
+        } elseif ($regular_price > 0) {
+            $price = $regular_price;
+        }
+    }
+    if ($regular_price <= 0) {
         $regular_price = $price;
     }
 
@@ -629,7 +649,7 @@ function ecommerce_custom_query_vars($vars) {
 add_filter('query_vars', 'ecommerce_custom_query_vars');
 
 /**
- * Template Router for Custom Routes
+ * Template Router for Custom Routes & WooCommerce Templates
  */
 function ecommerce_template_include($template) {
     $route = get_query_var('ecommerce_route');
@@ -643,10 +663,19 @@ function ecommerce_template_include($template) {
         $product_id = sanitize_text_field($_GET['product']);
     }
 
-    if (!empty($product_id)) {
+    // WooCommerce single product or custom product route
+    if (!empty($product_id) || (function_exists('is_product') && is_product())) {
         $single_template = locate_template(['single-product.php']);
         if ($single_template) {
             return $single_template;
+        }
+    }
+
+    // WooCommerce shop or product category / archive route
+    if ($route === 'shop' || (function_exists('is_shop') && is_shop()) || (function_exists('is_product_taxonomy') && is_product_taxonomy()) || (function_exists('is_post_type_archive') && is_post_type_archive('product'))) {
+        $shop_template = locate_template(['archive-product.php', 'page-shop.php']);
+        if ($shop_template) {
+            return $shop_template;
         }
     }
 
@@ -671,7 +700,7 @@ function ecommerce_template_include($template) {
 
     return $template;
 }
-add_filter('template_include', 'ecommerce_template_include');
+add_filter('template_include', 'ecommerce_template_include', 99);
 
 /**
  * Ensure Rewrite Rules are Flushed Once
