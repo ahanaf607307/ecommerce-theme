@@ -820,14 +820,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         searchResultsContainer.querySelectorAll('.search-result-item').forEach(item => {
             item.addEventListener('click', () => {
-                const card = document.querySelector(`.product-card[data-id="${item.dataset.id}"]`);
-                if (card) {
-                    closeSearch();
-                    openQuickView(extractCardData(card));
-                }
+                closeSearch();
+                const targetUrl = (config.homeUrl || '/') + 'product/' + item.dataset.id + '/';
+                window.location.href = targetUrl;
             });
         });
     }
+
+    // Expose Global Cart API for single product & dedicated pages
+    window.ecommerceAddToCart = addToCart;
+    window.renderCartUI = renderCartUI;
+    document.addEventListener('ecommerce:add-to-cart', (e) => {
+        if (e.detail && e.detail.product) {
+            addToCart(e.detail.product, e.detail.qty || 1, e.detail.color || '');
+        }
+    });
 
     // ==========================================================================
     // 11. FLASH SALE COUNTDOWN TIMER
