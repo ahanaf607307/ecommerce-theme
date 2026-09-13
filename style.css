@@ -1,0 +1,17 @@
+/*
+Theme Name: Ecommerce
+Theme URI: https://github.com/ecommerce/ecommerce-theme
+Author: Antigravity
+Author URI: https://antigravity.dev
+Description: Ultra-modern, high-converting eCommerce landing page and storefront theme with glassmorphic aesthetics, slide-over cart drawer, product quick view modal, dynamic filtering, and WooCommerce compatibility.
+Version: 1.0.0
+Requires at least: 6.0
+Tested up to: 6.7
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: ecommerce
+Tags: e-commerce, modern, dark-mode, landing-page, responsive, full-site-editing, custom-colors, grid-layout
+*/
+
+/* Core theme styles are modularized in assets/css/ecommerce.css */
