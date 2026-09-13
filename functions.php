@@ -119,13 +119,132 @@ function ecommerce_theme_scripts() {
 add_action('wp_enqueue_scripts', 'ecommerce_theme_scripts');
 
 /**
- * Fallback & Seed Products Data for Standalone Landing Page
+ * Format a WooCommerce Product Object into the theme's clean array format
+ */
+function ecommerce_format_wc_product($wc_prod) {
+    if (!is_object($wc_prod)) {
+        return null;
+    }
+
+    $id = $wc_prod->get_id();
+    $image_id = $wc_prod->get_image_id();
+    $image_url = $image_id ? wp_get_attachment_image_url($image_id, 'large') : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=900&q=80';
+
+    // Gallery images
+    $gallery_ids = $wc_prod->get_gallery_image_ids();
+    $gallery = [$image_url];
+    if (!empty($gallery_ids)) {
+        foreach ($gallery_ids as $gid) {
+            $gurl = wp_get_attachment_image_url($gid, 'large');
+            if ($gurl && !in_array($gurl, $gallery, true)) {
+                $gallery[] = $gurl;
+            }
+        }
+    }
+
+    // Categories
+    $terms = wp_get_post_terms($id, 'product_cat');
+    $cat_slug = (!empty($terms) && !is_wp_error($terms)) ? $terms[0]->slug : 'general';
+    $cat_name = (!empty($terms) && !is_wp_error($terms)) ? $terms[0]->name : 'General';
+
+    // Pricing
+    $price = (float) $wc_prod->get_price();
+    $regular_price = (float) $wc_prod->get_regular_price();
+    if (!$regular_price || $regular_price < $price) {
+        $regular_price = $price;
+    }
+
+    // Badges
+    $badge = '';
+    $badge_type = '';
+    if ($wc_prod->is_on_sale()) {
+        $badge = 'Sale';
+        $badge_type = 'sale';
+        if ($regular_price > $price && $regular_price > 0) {
+            $percent = round((($regular_price - $price) / $regular_price) * 100);
+            $badge = "Save {$percent}%";
+        }
+    } elseif ($wc_prod->is_featured()) {
+        $badge = 'Featured';
+        $badge_type = 'hot';
+    }
+
+    // Stock
+    $stock_qty = $wc_prod->get_stock_quantity();
+    $stock = $stock_qty !== null ? (int) $stock_qty : ($wc_prod->is_in_stock() ? 10 : 0);
+
+    // Newness (within 30 days)
+    $date_created = $wc_prod->get_date_created();
+    $is_new = $date_created ? ((time() - $date_created->getTimestamp()) < (30 * DAY_IN_SECONDS)) : false;
+
+    // Rating
+    $rating = (float) $wc_prod->get_average_rating();
+    if (!$rating) {
+        $rating = 5.0;
+    }
+
+    $short_desc = wp_strip_all_tags($wc_prod->get_short_description() ?: $wc_prod->get_description());
+    if (empty($short_desc)) {
+        $short_desc = 'High performance product engineered for uncompromising quality and daily durability.';
+    }
+
+    return [
+        'id'            => (string) $id,
+        'slug'          => $wc_prod->get_slug(),
+        'title'         => $wc_prod->get_name(),
+        'category'      => $cat_slug,
+        'category_name' => $cat_name,
+        'price'         => $price,
+        'regular_price' => $regular_price,
+        'rating'        => $rating,
+        'reviews_count' => (int) $wc_prod->get_review_count() ?: 1,
+        'badge'         => $badge,
+        'badge_type'    => $badge_type,
+        'is_trending'   => (bool) $wc_prod->is_featured(),
+        'is_bestseller' => (bool) $wc_prod->is_featured(),
+        'is_new'        => $is_new,
+        'stock'         => $stock,
+        'image'         => $image_url,
+        'gallery'       => $gallery,
+        'colors'        => ['#0F172A', '#E2E8F0', '#475569'],
+        'color_names'   => ['Midnight Slate', 'Polar Silver', 'Space Gray'],
+        'short_desc'    => $short_desc,
+        'features'      => [
+            $wc_prod->is_in_stock() ? 'In Stock & Ready to Ship' : 'Out of Stock',
+            'Authentic Product Guarantee',
+            'Full Manufacturer Warranty'
+        ]
+    ];
+}
+
+/**
+ * Catalog Products Data
  *
- * Provides a curated list of high-converting, premium tech & lifestyle products
- * when WooCommerce has no seeded products, ensuring the landing page is instantly
- * gorgeous and testable out of the box.
+ * Automatically pulls published WooCommerce products if WooCommerce is installed and
+ * has products. Falls back to curated seed products so the site is never blank.
  */
 function ecommerce_get_catalog_products() {
+    // If WooCommerce is active, load actual WooCommerce products
+    if (function_exists('wc_get_products')) {
+        $wc_products = wc_get_products([
+            'status' => 'publish',
+            'limit'  => -1,
+        ]);
+
+        if (!empty($wc_products)) {
+            $mapped = [];
+            foreach ($wc_products as $wc_prod) {
+                $formatted = ecommerce_format_wc_product($wc_prod);
+                if ($formatted) {
+                    $mapped[] = $formatted;
+                }
+            }
+            if (!empty($mapped)) {
+                return apply_filters('ecommerce_catalog_products', $mapped);
+            }
+        }
+    }
+
     $default_products = [
         [
             'id'             => 'prod-1',
@@ -341,12 +460,120 @@ function ecommerce_filter_products($tab = 'all') {
 }
 
 /**
+ * Retrieve Dynamic Product Categories
+ *
+ * Uses WooCommerce product_cat terms if available, otherwise extracts categories
+ * from the active catalog products with counts.
+ */
+function ecommerce_get_product_categories() {
+    $categories = [];
+
+    if (taxonomy_exists('product_cat')) {
+        $terms = get_terms([
+            'taxonomy'   => 'product_cat',
+            'hide_empty' => false,
+        ]);
+        if (!empty($terms) && !is_wp_error($terms)) {
+            foreach ($terms as $term) {
+                $categories[] = [
+                    'slug'        => $term->slug,
+                    'name'        => $term->name,
+                    'title'       => $term->name,
+                    'count'       => (int) $term->count,
+                    'description' => $term->description ?: ('Explore curated gear in ' . $term->name),
+                    'image'       => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
+                    'features'    => ['Premium Build', 'Direct Support', 'Express Delivery']
+                ];
+            }
+        }
+    }
+
+    if (empty($categories)) {
+        $all_prods = ecommerce_get_catalog_products();
+        $cat_map = [
+            'audio' => [
+                'name'        => 'Wireless Audio & Hi-Fi',
+                'description' => 'Hi-Res certified planar headphones, studio audiophile monitors, and intelligent ANC earbuds.',
+                'image'       => 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80',
+                'badge'       => 'Most Acclaimed',
+                'features'    => ['Lossless 24-bit/96kHz Audio', 'Hybrid Active Noise Canceling', '60-Hour Fast-Charge Batteries']
+            ],
+            'wearables' => [
+                'name'        => 'Smart Wearables & Tech',
+                'description' => 'Aerospace Grade-5 Titanium smartwatches, continuous HRV biosensing rings, and sapphire sports watches.',
+                'image'       => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
+                'badge'       => 'Next-Gen Biosensing',
+                'features'    => ['Aerospace Titanium Chassis', 'Sapphire Crystal Glass', '14-Day Continuous Battery']
+            ],
+            'edc' => [
+                'name'        => 'EDC & Workspace Setup',
+                'description' => 'Solid aircraft-grade aluminum 3-in-1 MagSafe charging docks, custom mechanical keyboards, and zero-glare desk lamps.',
+                'image'       => 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?auto=format&fit=crop&w=800&q=80',
+                'badge'       => 'Productivity Essentials',
+                'features'    => ['15W Fast MagSafe Charging', 'Gasket-Mounted Mechanical Keys', 'CRI > 98 Studio Lighting']
+            ],
+            'lifestyle' => [
+                'name'        => 'Travel & Everyday Gear',
+                'description' => 'Weatherproof X-Pac slings, magnetic Fidlock travel pouches, and RFID-shielded minimalist organizers.',
+                'image'       => 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80',
+                'badge'       => 'Weatherproof Protection',
+                'features'    => ['Waterproof Cordura & X-Pac', 'German Fidlock Quick-Release', 'Concealed Passport Security']
+            ]
+        ];
+
+        $counts = [];
+        foreach ($all_prods as $p) {
+            $cat = $p['category'] ?? 'general';
+            $counts[$cat] = ($counts[$cat] ?? 0) + 1;
+        }
+
+        foreach ($counts as $cat_slug => $c) {
+            $meta = $cat_map[$cat_slug] ?? [
+                'name'        => ucfirst($cat_slug),
+                'description' => 'High performance products in ' . ucfirst($cat_slug),
+                'image'       => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80',
+                'badge'       => 'Featured',
+                'features'    => ['Premium Design', 'Quality Tested', 'Express Delivery']
+            ];
+
+            $categories[] = [
+                'slug'        => $cat_slug,
+                'name'        => $meta['name'],
+                'title'       => $meta['name'],
+                'count'       => $c,
+                'description' => $meta['description'],
+                'image'       => $meta['image'],
+                'badge'       => $meta['badge'] ?? '',
+                'features'    => $meta['features']
+            ];
+        }
+    }
+
+    return apply_filters('ecommerce_product_categories', $categories);
+}
+
+/**
  * Retrieve a product by ID or slug
  */
 function ecommerce_get_product_by_id($id) {
+    if (function_exists('wc_get_product')) {
+        $wc_p = null;
+        if (is_numeric($id)) {
+            $wc_p = wc_get_product((int) $id);
+        } else {
+            $post = get_page_by_path($id, OBJECT, 'product');
+            if ($post) {
+                $wc_p = wc_get_product($post->ID);
+            }
+        }
+        if ($wc_p && is_object($wc_p)) {
+            return ecommerce_format_wc_product($wc_p);
+        }
+    }
+
     $products = ecommerce_get_catalog_products();
     foreach ($products as $p) {
-        if ($p['id'] === $id || sanitize_title($p['title']) === $id) {
+        if ($p['id'] == $id || sanitize_title($p['title']) === $id || (!empty($p['slug']) && $p['slug'] === $id)) {
             return $p;
         }
     }
@@ -359,6 +586,12 @@ function ecommerce_get_product_by_id($id) {
  */
 function ecommerce_get_product_url($product) {
     $id = is_array($product) ? ($product['id'] ?? '') : $product;
+    if (function_exists('wc_get_product') && is_numeric($id)) {
+        $permalink = get_permalink((int) $id);
+        if ($permalink) {
+            return $permalink;
+        }
+    }
     return home_url('/product/' . $id . '/');
 }
 

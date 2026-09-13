@@ -58,30 +58,18 @@ if ($current_sort === 'price-low') {
                                 <span class="count-pill"><?php echo count($all_products); ?></span>
                             </a>
                         </li>
-                        <li>
-                            <a href="<?php echo esc_url(add_query_arg('cat', 'audio', ecommerce_get_page_url('shop'))); ?>" class="filter-link <?php echo $current_cat === 'audio' ? 'active' : ''; ?>">
-                                <span>Wireless Audio</span>
-                                <span class="count-pill"><?php echo count(array_filter($all_products, fn($p) => $p['category'] === 'audio')); ?></span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="<?php echo esc_url(add_query_arg('cat', 'wearables', ecommerce_get_page_url('shop'))); ?>" class="filter-link <?php echo $current_cat === 'wearables' ? 'active' : ''; ?>">
-                                <span>Smart Tech</span>
-                                <span class="count-pill"><?php echo count(array_filter($all_products, fn($p) => $p['category'] === 'wearables')); ?></span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="<?php echo esc_url(add_query_arg('cat', 'edc', ecommerce_get_page_url('shop'))); ?>" class="filter-link <?php echo $current_cat === 'edc' ? 'active' : ''; ?>">
-                                <span>EDC &amp; Workspace</span>
-                                <span class="count-pill"><?php echo count(array_filter($all_products, fn($p) => $p['category'] === 'edc')); ?></span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="<?php echo esc_url(add_query_arg('cat', 'lifestyle', ecommerce_get_page_url('shop'))); ?>" class="filter-link <?php echo $current_cat === 'lifestyle' ? 'active' : ''; ?>">
-                                <span>Lifestyle &amp; Bags</span>
-                                <span class="count-pill"><?php echo count(array_filter($all_products, fn($p) => $p['category'] === 'lifestyle')); ?></span>
-                            </a>
-                        </li>
+                        <?php 
+                        $shop_categories = ecommerce_get_product_categories();
+                        foreach ($shop_categories as $scat) : 
+                            $scat_count = count(array_filter($all_products, fn($p) => $p['category'] === $scat['slug']));
+                        ?>
+                            <li>
+                                <a href="<?php echo esc_url(add_query_arg('cat', $scat['slug'], ecommerce_get_page_url('shop'))); ?>" class="filter-link <?php echo $current_cat === $scat['slug'] ? 'active' : ''; ?>">
+                                    <span><?php echo esc_html($scat['name']); ?></span>
+                                    <span class="count-pill"><?php echo esc_html($scat_count); ?></span>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
                     </ul>
                 </div>
 

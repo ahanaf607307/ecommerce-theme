@@ -23,27 +23,31 @@ $products = ecommerce_get_catalog_products();
             </div>
 
             <!-- Dynamic Filter Bar -->
+            <?php
+            $categories_list = ecommerce_get_product_categories();
+            $icon_map = [
+                'audio'     => 'fa-headphones',
+                'wearables' => 'fa-stopwatch',
+                'edc'       => 'fa-keyboard',
+                'lifestyle' => 'fa-bag-shopping',
+            ];
+            ?>
             <div class="filter-tabs-nav" role="tablist">
                 <button type="button" class="filter-tab-btn active" data-filter="all" role="tab" aria-selected="true">
                     <span>All Products</span>
                     <span class="tab-count"><?php echo count($products); ?></span>
                 </button>
-                <button type="button" class="filter-tab-btn" data-filter="audio" role="tab" aria-selected="false">
-                    <i class="fa-solid fa-headphones"></i>
-                    <span>Audio</span>
-                </button>
-                <button type="button" class="filter-tab-btn" data-filter="wearables" role="tab" aria-selected="false">
-                    <i class="fa-solid fa-stopwatch"></i>
-                    <span>Smart Tech</span>
-                </button>
-                <button type="button" class="filter-tab-btn" data-filter="edc" role="tab" aria-selected="false">
-                    <i class="fa-solid fa-keyboard"></i>
-                    <span>Workspace</span>
-                </button>
-                <button type="button" class="filter-tab-btn" data-filter="lifestyle" role="tab" aria-selected="false">
-                    <i class="fa-solid fa-bag-shopping"></i>
-                    <span>Lifestyle</span>
-                </button>
+                <?php foreach ($categories_list as $cat_item) : 
+                    $cat_icon = $icon_map[$cat_item['slug']] ?? 'fa-layer-group';
+                ?>
+                    <button type="button" class="filter-tab-btn" data-filter="<?php echo esc_attr($cat_item['slug']); ?>" role="tab" aria-selected="false">
+                        <i class="fa-solid <?php echo esc_attr($cat_icon); ?>"></i>
+                        <span><?php echo esc_html($cat_item['name']); ?></span>
+                        <?php if (!empty($cat_item['count'])) : ?>
+                            <span class="tab-count"><?php echo esc_html($cat_item['count']); ?></span>
+                        <?php endif; ?>
+                    </button>
+                <?php endforeach; ?>
             </div>
         </div>
 

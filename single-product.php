@@ -12,10 +12,13 @@ if (!defined('ABSPATH')) {
 
 get_header();
 
-// Determine product from query var or GET param
+// Determine product from query var, GET param, or current post ID
 $product_id = get_query_var('ecommerce_product');
 if (empty($product_id) && isset($_GET['product'])) {
     $product_id = sanitize_text_field($_GET['product']);
+}
+if (empty($product_id) && get_the_ID()) {
+    $product_id = (string) get_the_ID();
 }
 if (empty($product_id)) {
     $product_id = 'prod-1';
@@ -23,7 +26,8 @@ if (empty($product_id)) {
 
 $product = ecommerce_get_product_by_id($product_id);
 if (!$product) {
-    $product = ecommerce_get_product_by_id('prod-1');
+    $all = ecommerce_get_catalog_products();
+    $product = $all[0] ?? null;
 }
 
 $all_products = ecommerce_get_catalog_products();
