@@ -137,8 +137,6 @@ if (!defined('ABSPATH')) {
                 <li><a href="<?php echo esc_url(ecommerce_get_page_url('shop')); ?>">Browse Full Catalog</a></li>
                 <li><a href="<?php echo esc_url(ecommerce_get_page_url('deals')); ?>">VIP Bundle Offers</a></li>
                 <li><a href="<?php echo esc_url(ecommerce_get_page_url('checkout')); ?>">Express Checkout</a></li>
-            </ul>
-        </div>
                 <li><a href="#">Sustainability & Materials</a></li>
                 <li><a href="#">Press Kit & Media</a></li>
                 <li><a href="#">Affiliate Program</a></li>

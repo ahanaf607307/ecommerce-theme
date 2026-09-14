@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
-define('ECOMMERCE_THEME_VERSION', '1.0.2');
+define('ECOMMERCE_THEME_VERSION', '1.0.3');
 define('ECOMMERCE_THEME_DIR', get_template_directory());
 define('ECOMMERCE_THEME_URI', get_template_directory_uri());
 
